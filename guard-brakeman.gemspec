@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project         = 'guard-brakeman'
 
-  s.add_dependency 'guard',   '>= 1.1.0'
+  s.add_dependency 'guard',   '>= 2.0.0'
   s.add_dependency 'brakeman', '>= 2.1.1'
 
   s.files        = Dir.glob('{lib}/**/*') + %w[LICENSE README.md]
