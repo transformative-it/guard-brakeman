@@ -5,6 +5,9 @@ require 'rbconfig'
 
 group :development, :test do
   gem 'rake'
-  gem 'rspec'
+  gem 'guard-bundler'
+  gem 'guard-rspec'
+  gem 'guard-cucumber'
+  gem 'rspec', '~> 2.99'
   gem 'aruba'
 end
