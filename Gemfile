@@ -4,11 +4,14 @@ gemspec
 require 'rbconfig'
 
 group :development, :test do
-  gem 'rake'
-  gem 'guard-bundler'
-  gem 'guard-rspec'
-  gem 'guard-cucumber'
+  gem 'rake', require: false
   gem 'rspec', '~> 2.99'
-  gem 'transpec'
-  gem 'aruba'
+  gem 'aruba', require: false
+end
+
+group :development do
+  gem 'guard-bundler', require: false
+  gem 'guard-rspec', require: false
+  gem 'guard-cucumber', require: false
+  gem 'transpec', require: false
 end
