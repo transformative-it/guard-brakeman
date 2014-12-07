@@ -1,5 +1,5 @@
-require 'guard'
-require 'guard/plugin'
+# Don't require "guard/plugin" here or in any other plugin's files
+require 'guard/compat/plugin'
 
 require 'brakeman'
 require 'brakeman/scanner'

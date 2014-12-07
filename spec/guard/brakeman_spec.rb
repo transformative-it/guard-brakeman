@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+require 'guard/compat/test/helper'
 require 'guard/brakeman'
 
 # TODO
@@ -15,6 +16,8 @@ describe Guard::Brakeman do
     @guard.stub(:decorate_warning)
     @guard.instance_variable_set(:@tracker, tracker)
     @guard.instance_variable_set(:@options, {:notifications => false, :app_path => 'tmp/aruba/default_app'})
+    allow(Guard::UI).to receive(:color).and_return("foo")
+    allow(Guard::UI).to receive(:info)
   end
 
   describe '#start' do
