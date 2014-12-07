@@ -8,8 +8,8 @@ require 'guard/brakeman'
 # Pending tests
 describe Guard::Brakeman do
   let(:default_options) { {:cli => '--stuff'} }
-  let(:tracker) { double().as_null_object }
-  let(:report) { double().as_null_object }
+  let(:tracker) { double("tracker") }
+  let(:report) { double("report").as_null_object }
 
   before(:each) do
     @guard = Guard::Brakeman.new
@@ -58,7 +58,9 @@ describe Guard::Brakeman do
     it 'runs all checks' do
       @guard.stub(:print_failed)
       tracker.should_receive(:run_checks)
-      tracker.stub_chain(:checks, :all_warnings, :any?)
+      tracker.stub_chain(:checks, :all_warnings).and_return([])
+      tracker.should_receive(:filtered_warnings).and_return([])
+      ::Brakeman.should_receive(:filter_warnings).with(tracker, anything)
       @guard.run_all
     end
   end
@@ -69,6 +71,7 @@ describe Guard::Brakeman do
     it 'rescans changed files, and checks all files' do
       ::Brakeman.should_receive(:rescan).with(tracker, ['files/file']).and_return(report)
       report.stub(:any_warnings?)
+      tracker.should_receive(:checks).and_return([double("check")])
       @guard.run_on_changes(['files/file'])
     end
   end

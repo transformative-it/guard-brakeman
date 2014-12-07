@@ -40,6 +40,7 @@ module Guard
         :min_confidence => 1,
         :quiet => false
       }.merge!(options)
+      @scanner_opts = ::Brakeman::set_options({:app_path => '.'}.merge(@options))
     end
 
     # Gets called once when Guard starts.
@@ -63,6 +64,7 @@ module Guard
     # @raise [:task_has_failed] when stop has failed
     #
     def run_all
+      fail "no scanner opts (start not called?)!" if @scanner_opts.nil?
       @tracker.run_checks
       ::Brakeman.filter_warnings @tracker, @scanner_opts
       print_failed(@tracker)
@@ -179,7 +181,7 @@ module Guard
     end
 
     def info(message, color = :white)
-      UI.info(UI.send(:color, message, color))
+      UI.info(UI.color(message, color))
     end
 
     def warning_info(warnings, color = :white)
