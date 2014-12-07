@@ -8,7 +8,7 @@ desc "Default: run unit tests."
 task :default => [:spec, :cukes]
 
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.fail_on_error = false
+  # t.fail_on_error = false
   t.verbose = true
 end
 

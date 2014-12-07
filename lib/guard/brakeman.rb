@@ -1,5 +1,5 @@
-require 'guard'
-require 'guard/plugin'
+# Don't require "guard/plugin" here or in any other plugin's files
+require 'guard/compat/plugin'
 
 require 'brakeman'
 require 'brakeman/scanner'
@@ -40,6 +40,7 @@ module Guard
         :min_confidence => 1,
         :quiet => false
       }.merge!(options)
+      @scanner_opts = ::Brakeman::set_options({:app_path => '.'}.merge(@options))
     end
 
     # Gets called once when Guard starts.
@@ -54,7 +55,7 @@ module Guard
       if @options[:run_on_start]
         run_all
       elsif @options[:chatty]
-        ::Guard::Notifier.notify("Brakeman is ready to work!", :title => "Brakeman started", :image => :pending)
+        Guard::Compat::Notifier.notify("Brakeman is ready to work!", :title => "Brakeman started", :image => :pending)
       end
     end
 
@@ -63,6 +64,7 @@ module Guard
     # @raise [:task_has_failed] when stop has failed
     #
     def run_all
+      fail "no scanner opts (start not called?)!" if @scanner_opts.nil?
       @tracker.run_checks
       ::Brakeman.filter_warnings @tracker, @scanner_opts
       print_failed(@tracker)
@@ -96,7 +98,7 @@ module Guard
       end
 
       if @options[:chatty] && all_warnings.any?
-        ::Guard::Notifier.notify(message, :title => "Full Brakeman results", :image => icon)
+        Guard::Compat::UI.notify(message, :title => "Full Brakeman results", :image => icon)
       end
 
       info(message, 'yellow')
@@ -157,7 +159,7 @@ module Guard
       end
 
       if @options[:notifications] && should_alert
-        ::Guard::Notifier.notify(message.join(", ").chomp, :title => title, :image => icon)
+        Guard::Compat::UI.notify(message.join(", ").chomp, :title => title, :image => icon)
       end
     end
 
@@ -179,7 +181,7 @@ module Guard
     end
 
     def info(message, color = :white)
-      UI.info(UI.send(:color, message, color))
+      Guard::Compat::UI.info(Guard::Compat::UI.color(message, color))
     end
 
     def warning_info(warnings, color = :white)
@@ -198,7 +200,8 @@ module Guard
         :white
       end
 
-      output =  UI.send(:color, ::Brakeman::Warning::TEXT_CONFIDENCE[warning.confidence], color)
+      msg = ::Brakeman::Warning::TEXT_CONFIDENCE[warning.confidence], color
+      output =  Guard::Compat::UI.color(msg)
       output << " - #{warning.warning_type} - #{warning.message}"
       output << " near line #{warning.line}" if warning.line
       if warning.file
