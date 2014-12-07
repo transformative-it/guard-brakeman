@@ -1,12 +1,10 @@
-require 'spec_helper'
-
 require 'guard/compat/test/helper'
 require 'guard/brakeman'
 
 # TODO
 # Barely covers happy case, ignores sad case
 # Pending tests
-describe Guard::Brakeman do
+RSpec.describe Guard::Brakeman do
   let(:default_options) { {:cli => '--stuff'} }
   let(:tracker) { double("tracker") }
   let(:report) { double("report").as_null_object }
@@ -58,7 +56,7 @@ describe Guard::Brakeman do
     it 'runs all checks' do
       allow(@guard).to receive(:print_failed)
       expect(tracker).to receive(:run_checks)
-      tracker.stub_chain(:checks, :all_warnings).and_return([])
+      allow(tracker).to receive_message_chain(:checks, :all_warnings).and_return([])
       expect(tracker).to receive(:filtered_warnings).and_return([])
       expect(::Brakeman).to receive(:filter_warnings).with(tracker, anything)
       @guard.run_all
