@@ -9,5 +9,6 @@ group :development, :test do
   gem 'guard-rspec'
   gem 'guard-cucumber'
   gem 'rspec', '~> 2.99'
+  gem 'transpec'
   gem 'aruba'
 end
