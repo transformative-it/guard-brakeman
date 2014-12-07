@@ -13,7 +13,7 @@ describe Guard::Brakeman do
 
   before(:each) do
     @guard = Guard::Brakeman.new
-    @guard.stub(:decorate_warning)
+    allow(@guard).to receive(:decorate_warning)
     @guard.instance_variable_set(:@tracker, tracker)
     @guard.instance_variable_set(:@options, {:notifications => false, :app_path => 'tmp/aruba/default_app'})
     allow(Guard::UI).to receive(:color).and_return("foo")
@@ -24,8 +24,8 @@ describe Guard::Brakeman do
     let(:scanner) { double(:process => tracker) }
 
     it 'initializes brakeman by scanning all files' do
-      ::Brakeman::Scanner.stub(:new).and_return(scanner)
-      scanner.should_receive(:process)
+      allow(::Brakeman::Scanner).to receive(:new).and_return(scanner)
+      expect(scanner).to receive(:process)
       @guard.start
     end
 
@@ -35,8 +35,8 @@ describe Guard::Brakeman do
       end
 
       it 'runs all checks' do
-        scanner.stub(:process).and_return(tracker)
-        @guard.should_receive(:run_all)
+        allow(scanner).to receive(:process).and_return(tracker)
+        expect(@guard).to receive(:run_all)
         @guard.start
       end
     end
@@ -48,7 +48,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not run the specified checks' do
-        ::Brakeman::Scanner.should_receive(:new).with(hash_including(options)).and_return(scanner)
+        expect(::Brakeman::Scanner).to receive(:new).with(hash_including(options)).and_return(scanner)
         @guard.start
       end
     end
@@ -56,11 +56,11 @@ describe Guard::Brakeman do
 
   describe '#run_all' do
     it 'runs all checks' do
-      @guard.stub(:print_failed)
-      tracker.should_receive(:run_checks)
+      allow(@guard).to receive(:print_failed)
+      expect(tracker).to receive(:run_checks)
       tracker.stub_chain(:checks, :all_warnings).and_return([])
-      tracker.should_receive(:filtered_warnings).and_return([])
-      ::Brakeman.should_receive(:filter_warnings).with(tracker, anything)
+      expect(tracker).to receive(:filtered_warnings).and_return([])
+      expect(::Brakeman).to receive(:filter_warnings).with(tracker, anything)
       @guard.run_all
     end
   end
@@ -69,16 +69,16 @@ describe Guard::Brakeman do
 
   describe '#run_on_change' do
     it 'rescans changed files, and checks all files' do
-      ::Brakeman.should_receive(:rescan).with(tracker, ['files/file']).and_return(report)
-      report.stub(:any_warnings?)
-      tracker.should_receive(:checks).and_return([double("check")])
+      expect(::Brakeman).to receive(:rescan).with(tracker, ['files/file']).and_return(report)
+      allow(report).to receive(:any_warnings?)
+      expect(tracker).to receive(:checks).and_return([double("check")])
       @guard.run_on_changes(['files/file'])
     end
   end
 
   describe '#print_failed' do
     before(:each) do
-      report.stub(:all_warnings).and_return [double(:confidence => 0)]
+      allow(report).to receive(:all_warnings).and_return [double(:confidence => 0)]
     end
 
     context 'with the chatty flag' do
@@ -87,7 +87,7 @@ describe Guard::Brakeman do
       end
 
       it 'notifies the user' do
-        ::Guard::Notifier.should_receive :notify
+        expect(::Guard::Notifier).to receive :notify
         @guard.send :print_failed, report
       end
     end
@@ -98,14 +98,14 @@ describe Guard::Brakeman do
       end
 
       it 'writes the brakeman report to disk' do
-        @guard.should_receive(:write_report)
+        expect(@guard).to receive(:write_report)
         @guard.send :print_failed, report
       end
 
       it 'adds the report filename to the growl' do
-        @guard.stub(:write_report)
+        allow(@guard).to receive(:write_report)
         @guard.instance_variable_set(:@options, @guard.instance_variable_get(:@options).merge({:chatty => true}))
-        ::Guard::Notifier.should_receive(:notify).with(/test\.csv/, anything)
+        expect(::Guard::Notifier).to receive(:notify).with(/test\.csv/, anything)
         @guard.send :print_failed, report
       end
     end
@@ -116,7 +116,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not notify the user' do
-        ::Guard::Notifier.should_not_receive :notify
+        expect(::Guard::Notifier).not_to receive :notify
         @guard.send :print_failed, report
       end
     end
@@ -124,7 +124,7 @@ describe Guard::Brakeman do
 
   describe '#print_changed' do
     before(:each) do
-      report.stub(:all_warnings).and_return [double(:confidence => 3)]
+      allow(report).to receive(:all_warnings).and_return [double(:confidence => 3)]
     end
 
     context 'with the min_confidence setting' do
@@ -134,7 +134,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not alert on warnings below the threshold' do
-        ::Guard::Notifier.should_not_receive :notify
+        expect(::Guard::Notifier).not_to receive :notify
         @guard.send :print_changed, report
       end
     end
@@ -145,7 +145,7 @@ describe Guard::Brakeman do
       end
 
       it 'notifies the user' do
-        ::Guard::Notifier.should_receive :notify
+        expect(::Guard::Notifier).to receive :notify
         @guard.send :print_changed, report
       end
     end
@@ -156,7 +156,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not notify the user' do
-        ::Guard::Notifier.should_not_receive :notify
+        expect(::Guard::Notifier).not_to receive :notify
         @guard.send :print_changed, report
       end
     end
@@ -167,14 +167,14 @@ describe Guard::Brakeman do
       end
 
       it 'writes the brakeman report to disk' do
-        File.should_receive(:open).with('test.csv', 'w')
+        expect(File).to receive(:open).with('test.csv', 'w')
         @guard.send :print_changed, report
       end
 
       it 'adds the report filename to the growl' do
-        @guard.stub(:write_report)
+        allow(@guard).to receive(:write_report)
         @guard.instance_variable_set(:@options, @guard.instance_variable_get(:@options).merge({:notifications => true}))
-        ::Guard::Notifier.should_receive(:notify).with(/test\.csv/, anything)
+        expect(::Guard::Notifier).to receive(:notify).with(/test\.csv/, anything)
         @guard.send :print_changed, report
       end
     end
@@ -184,7 +184,7 @@ describe Guard::Brakeman do
     it 'writes the report to disk' do
       @guard.instance_variable_set(:@options, {:output_files => ['test.csv']})
 
-      File.should_receive(:open).with('test.csv', 'w')
+      expect(File).to receive(:open).with('test.csv', 'w')
       @guard.send(:write_report)
     end
   end
