@@ -16,8 +16,8 @@ describe Guard::Brakeman do
     allow(@guard).to receive(:decorate_warning)
     @guard.instance_variable_set(:@tracker, tracker)
     @guard.instance_variable_set(:@options, {:notifications => false, :app_path => 'tmp/aruba/default_app'})
-    allow(Guard::UI).to receive(:color).and_return("foo")
-    allow(Guard::UI).to receive(:info)
+    allow(Guard::Compat::UI).to receive(:color).and_return("foo")
+    allow(Guard::Compat::UI).to receive(:info)
   end
 
   describe '#start' do
@@ -105,7 +105,7 @@ describe Guard::Brakeman do
       it 'adds the report filename to the growl' do
         allow(@guard).to receive(:write_report)
         @guard.instance_variable_set(:@options, @guard.instance_variable_get(:@options).merge({:chatty => true}))
-        expect(::Guard::Notifier).to receive(:notify).with(/test\.csv/, anything)
+        expect(Guard::Compat::UI).to receive(:notify).with(/test\.csv/, anything)
         @guard.send :print_failed, report
       end
     end
@@ -116,7 +116,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not notify the user' do
-        expect(::Guard::Notifier).not_to receive :notify
+        expect(::Guard::Compat::UI).not_to receive :notify
         @guard.send :print_failed, report
       end
     end
@@ -134,7 +134,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not alert on warnings below the threshold' do
-        expect(::Guard::Notifier).not_to receive :notify
+        expect(Guard::Compat::UI).not_to receive :notify
         @guard.send :print_changed, report
       end
     end
@@ -145,7 +145,7 @@ describe Guard::Brakeman do
       end
 
       it 'notifies the user' do
-        expect(::Guard::Notifier).to receive :notify
+        expect(Guard::Compat::UI).to receive :notify
         @guard.send :print_changed, report
       end
     end
@@ -156,7 +156,7 @@ describe Guard::Brakeman do
       end
 
       it 'does not notify the user' do
-        expect(::Guard::Notifier).not_to receive :notify
+        expect(Guard::Compat::UI).not_to receive :notify
         @guard.send :print_changed, report
       end
     end
