@@ -10,7 +10,8 @@ group :development, :test do
 end
 
 group :development do
-  gem 'guard-bundler', '~> 2.0.0', '>= 2.0.1', require: false
+  # gem 'guard-bundler', '~> 2.0.0', '>= 2.0.1', require: false
+  gem 'guard-bundler', github: 'guard/guard-bundler', branch: 'master', require: false
   gem 'guard-rspec', require: false
   gem 'guard-cucumber', require: false
   gem 'transpec', require: false
