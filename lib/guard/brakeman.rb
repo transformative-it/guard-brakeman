@@ -78,7 +78,7 @@ module Guard
     #
     def run_on_changes paths
       return run_all unless @tracker.checks
-      info "\n\nrescanning #{paths}, running all checks"
+      info "\n\nrescanning #{paths}, running all checks" unless options[:quiet]
       report = ::Brakeman::rescan(@tracker, paths)
       print_changed(report)
       throw :task_has_failed if report.any_warnings?
@@ -87,7 +87,7 @@ module Guard
     private
 
     def print_failed tracker
-      info "\n------ brakeman warnings --------\n"
+      info "\n------ brakeman warnings --------\n" unless options[:quiet]
       all_warnings = tracker.filtered_warnings
       icon = all_warnings.count > 0 ? :failed : :success
       message = "#{all_warnings.count} brakeman findings"
@@ -106,7 +106,7 @@ module Guard
     end
 
     def print_changed report
-      info "\n------ brakeman warnings --------\n"
+      info "\n------ brakeman warnings --------\n" unless options[:quiet]
 
       message = []
       should_alert = false
