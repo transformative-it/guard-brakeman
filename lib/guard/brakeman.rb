@@ -37,7 +37,7 @@ module Guard
         :notifications => true,
         :run_on_start => false,
         :chatty => false,
-        :min_confidence => 1,
+        :min_confidence => 2,
         :quiet => false
       }.merge!(options)
       @scanner_opts = ::Brakeman::set_options({:app_path => '.'}.merge(@options))
