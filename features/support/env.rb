@@ -20,5 +20,6 @@ class ApplicationController < ActionController::Base
 end
 	EOF
 
-  overwrite_file(File.expand_path('tmp/aruba/default_app/app/controllers/application_controller.rb'), content)
+  path = 'app/controllers/application_controller.rb'
+  overwrite_file(path, content)
 end
