@@ -50,7 +50,6 @@ module Guard
     def start
       @scanner_opts = ::Brakeman::set_options({:app_path => '.'}.merge(@options))
       @options.merge!(@scanner_opts)
-      @tracker = ::Brakeman::Scanner.new(@scanner_opts).process
 
       if @options[:run_on_start]
         run_all
@@ -65,10 +64,10 @@ module Guard
     #
     def run_all
       fail "no scanner opts (start not called?)!" if @scanner_opts.nil?
-      @tracker.run_checks
-      ::Brakeman.filter_warnings @tracker, @scanner_opts
-      print_failed(@tracker)
-      throw :task_has_failed if @tracker.filtered_warnings.any?
+      tracker.run_checks
+      ::Brakeman.filter_warnings tracker, @scanner_opts
+      print_failed
+      throw :task_has_failed if tracker.filtered_warnings.any?
     end
 
     # Gets called when watched paths and files have changes.
@@ -77,16 +76,20 @@ module Guard
     # @raise [:task_has_failed] when stop has failed
     #
     def run_on_changes paths
-      return run_all unless @tracker.checks
+      return run_all unless tracker.checks
       info "\n\nrescanning #{paths}, running all checks" unless options[:quiet]
-      report = ::Brakeman::rescan(@tracker, paths)
+      report = ::Brakeman::rescan(tracker, paths)
       print_changed(report)
       throw :task_has_failed if report.any_warnings?
     end
 
     private
 
-    def print_failed tracker
+    def tracker
+      @tracker ||= ::Brakeman::Scanner.new(@scanner_opts).process
+    end
+
+    def print_failed
       info "\n------ brakeman warnings --------\n" unless options[:quiet]
       all_warnings = tracker.filtered_warnings
       icon = all_warnings.count > 0 ? :failed : :success
@@ -166,7 +169,7 @@ module Guard
     def write_report
       @options[:output_files].each_with_index do |output_file, i|
         File.open output_file, "w" do |f|
-          f.puts @tracker.report.send(@options[:output_formats][i])
+          f.puts tracker.report.send(@options[:output_formats][i])
         end
       end
     end
