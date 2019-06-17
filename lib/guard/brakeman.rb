@@ -204,13 +204,24 @@ module Guard
       output =  Guard::Compat::UI.color(msg)
       output << " - #{warning.warning_type} - #{warning.message}"
       output << " near line #{warning.line}" if warning.line
-      if warning.file
-        # fix this ish or wait for brakeman to be fixed
-        filename = warning.file.gsub(@options[:app_path], '')
-        output << " in #{filename}"
+
+      if path = relative_warning_path(warning)
+        output << " in #{path}"
       end
+
       output << ": #{warning.format_code}" if warning.code
       output
+    end
+
+    def relative_warning_path warning
+      case
+      when warning.file.nil? # This should never really happen
+        nil
+      when warning.respond_to?(:relative_path) # For Brakeman < 4.5.1
+        warning.relative_path
+      else # Must be new Brakeman::FilePath, Brakeman >= 4.5.1
+        warning.file.relative
+      end
     end
   end
 end
