@@ -1,3 +1,11 @@
+# 0.8.4
+
+Add support for modern brakemans @presidentbeef
+
+# 0.8.3
+
+???
+
 # 0.8.2
 
 Adds support for url safe methods
