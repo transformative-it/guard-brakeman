@@ -21,9 +21,9 @@ RSpec.describe Guard::Brakeman do
   describe '#start' do
     let(:scanner) { double(:process => tracker) }
 
-    it 'initializes brakeman by scanning all files' do
+    it 'lazily initializes brakeman by scanning all files' do
       allow(::Brakeman::Scanner).to receive(:new).and_return(scanner)
-      expect(scanner).to receive(:process)
+      expect(scanner).not_to receive(:process)
       @guard.start
     end
 
@@ -39,6 +39,18 @@ RSpec.describe Guard::Brakeman do
       end
     end
 
+    context 'with the run_on_start false option' do
+      before(:each) do
+        @guard.instance_variable_set(:@options, @guard.instance_variable_get(:@options).merge({:run_on_start => false}))
+      end
+
+      it 'runs all checks' do
+        allow(scanner).to receive(:process).and_return(tracker)
+        expect(@guard).not_to receive(:run_all)
+        @guard.start
+      end
+    end
+
     context 'with the exclude option' do
       let(:options) { {:skip_checks => ['CheckDefaultRoutes']} }
       before(:each) do
@@ -46,8 +58,10 @@ RSpec.describe Guard::Brakeman do
       end
 
       it 'does not run the specified checks' do
+        @guard.instance_variable_set(:@tracker, nil)
         expect(::Brakeman::Scanner).to receive(:new).with(hash_including(options)).and_return(scanner)
         @guard.start
+        @guard.send(:tracker)
       end
     end
   end
@@ -76,7 +90,7 @@ RSpec.describe Guard::Brakeman do
 
   describe '#print_failed' do
     before(:each) do
-      allow(report).to receive(:all_warnings).and_return [double(:confidence => 0)]
+      expect(tracker).to receive(:filtered_warnings).and_return report.all_warnings
     end
 
     context 'with the chatty flag' do
@@ -86,7 +100,7 @@ RSpec.describe Guard::Brakeman do
 
       it 'notifies the user' do
         expect(::Guard::Notifier).to receive :notify
-        @guard.send :print_failed, report
+        @guard.send :print_failed
       end
     end
 
@@ -97,25 +111,22 @@ RSpec.describe Guard::Brakeman do
 
       it 'writes the brakeman report to disk' do
         expect(@guard).to receive(:write_report)
-        @guard.send :print_failed, report
+        @guard.send :print_failed
       end
 
       it 'adds the report filename to the growl' do
         allow(@guard).to receive(:write_report)
         @guard.instance_variable_set(:@options, @guard.instance_variable_get(:@options).merge({:chatty => true}))
         expect(Guard::Compat::UI).to receive(:notify).with(/test\.csv/, anything)
-        @guard.send :print_failed, report
+        @guard.send :print_failed
       end
     end
 
     context 'with notifications disabled' do
-      before(:each) do
-        @guard.instance_variable_set(:@options, {:chatty => false})
-      end
-
       it 'does not notify the user' do
+        @guard.instance_variable_set(:@options, {:chatty => false})
         expect(::Guard::Compat::UI).not_to receive :notify
-        @guard.send :print_failed, report
+        @guard.send :print_failed
       end
     end
   end
