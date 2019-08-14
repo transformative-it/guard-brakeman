@@ -1,3 +1,7 @@
+# 0.8.5
+
+Actually respect the `run_on_start` argument @jaredmoody
+
 # 0.8.4
 
 Add support for modern brakemans @presidentbeef
