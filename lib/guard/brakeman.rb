@@ -203,8 +203,8 @@ module Guard
         :white
       end
 
-      msg = ::Brakeman::Warning::TEXT_CONFIDENCE[warning.confidence], color
-      output =  Guard::Compat::UI.color(msg)
+      msg = ::Brakeman::Warning::TEXT_CONFIDENCE[warning.confidence]
+      output =  Guard::Compat::UI.color(msg, color)
       output << " - #{warning.warning_type} - #{warning.message}"
       output << " near line #{warning.line}" if warning.line
 
