@@ -1,3 +1,7 @@
+# 0.8.6
+
+Fix guard-compat issues @presidentbeef
+
 # 0.8.5
 
 Actually respect the `run_on_start` argument @jaredmoody
