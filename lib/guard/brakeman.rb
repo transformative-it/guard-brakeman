@@ -175,7 +175,7 @@ module Guard
     end
 
     def pluralize(count, singular, plural = nil)
-      "#{count || 0} " + ((count == 1 || count =~ /^1(\.0+)?$/) ? singular : (plural || pluralize_word(singular)))
+      "#{count || 0} " + ((count == 1 || count.to_s =~ /^1(\.0+)?$/) ? singular : (plural || pluralize_word(singular)))
     end
 
     # try ActiveSupport or naive pluralize
